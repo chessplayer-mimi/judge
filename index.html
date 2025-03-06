@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>審判 - 辯論投票</title>
+
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; background: #f4f4f4; }
+        .container { max-width: 800px; margin: auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        .topic { border: 1px solid #ccc; padding: 10px; margin-bottom: 10px; background: white; border-radius: 8px; }
+        .chart-container { width: 100%; height: 20px; background: lightgray; margin: 10px 0; display: flex; border-radius: 5px; overflow: hidden; }
+        .bar { height: 100%; transition: width 0.3s ease-in-out; }
+        .bar-a { background: red; }
+        .bar-b { background: blue; }
+        .bar-empty { background: gray; width: 100%; }
+        .comments { display: flex; justify-content: space-between; margin-top: 10px; }
+        .comments div { width: 48%; padding: 5px; border: 1px solid #ccc; border-radius: 5px; }
+        button { cursor: pointer; padding: 8px 12px; border: none; border-radius: 5px; background: #007bff; color: white; }
+        button.secondary { background: #f44336; }
+        button:disabled { background: #aaa; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>審判 - 辯論投票 </h1>
+
+        <!-- 註冊 / 登入 / 登出 按鈕 -->
+        <div>
+            <button id="auth-btn">登入 / 註冊</button>
+            <button id="logout-btn" class="secondary" style="display: none;" onclick="logout()">登出</button>
+        </div>
+
+        <!-- 發表話題 -->
+        <div id="new-topic-section" style="display: none; margin-top: 20px;">
+            <input type="text" id="new-topic" placeholder="輸入話題（格式: A 還是 B）">
+            <button id="add-topic-btn">發表話題</button>
+        </div>
+
+        <h2>🔥 熱門話題</h2>
+        <div id="hot-topics"></div>
+
+        <h2>🆕 最新話題</h2>
+        <div id="latest-topics"></div>
+    </div>
+
+    <!-- 登入/註冊 彈窗 -->
+    <div id="auth-modal" style="display: none;">
+        <h2>註冊 / 登入</h2>
+        <input type="email" id="auth-email" placeholder="輸入 Email">
+        <input type="password" id="auth-password" placeholder="輸入密碼">
+        <button onclick="register()">註冊</button>
+        <button onclick="login()">登入</button>
+    </div>
+
+    <!-- ✅ 加載 JavaScript -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+        import { getAuth } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCTGQMyAEXaznNzoOTwAfhKX8vevLQP76U",
+            authDomain: "judge-959d3.firebaseapp.com",
+            projectId: "judge-959d3",
+            storageBucket: "judge-959d3.firebasestorage.app",
+            messagingSenderId: "349303635393",
+            appId: "1:349303635393:web:b3908027173411a23f8340",
+            measurementId: "G-6SSVCN9NHS"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        window.auth = getAuth(app);
+    </script>
+
+    <script src="script.js" type="module"></script>
+
+    <script>
+        document.getElementById("auth-btn").addEventListener("click", () => {
+            document.getElementById("auth-modal").style.display = "block";
+        });
+    </script>
+
+</body>
+</html>

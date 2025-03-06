@@ -1,0 +1,23 @@
+{
+  "name": "judge",
+  "version": "1.0.0",
+  "description": "辯論投票遊戲",
+  "main": "index.html",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "serve": "npx http-server dist -p 5000",
+    "start": "npm run dev",
+    "postinstall": "npm install"
+  },
+  "dependencies": {
+    "firebase": "^10.8.1"
+  },
+  "devDependencies": {
+    "dotenv": "^16.0.3",
+    "vite": "^4.5.9"
+  },
+  "author": "mimi",
+  "license": "MIT"
+}
