@@ -82,37 +82,45 @@
         }
 
         function addTopicToUI(topic, container) {
-            const totalVotes = topic.votes.sideA + topic.votes.sideB || 1;
-            const sideAPercent = Math.round((topic.votes.sideA / totalVotes) * 100);
-            const sideBPercent = 100 - sideAPercent;
+    const totalVotes = topic.votes.sideA + topic.votes.sideB;
+    let chartHTML = '';
 
-            const topicDiv = document.createElement("div");
-            topicDiv.classList.add("topic");
-            topicDiv.innerHTML = `
-                <h2>${topic.title} <button onclick="likeTopic('${topic.id}')">👍 ${topic.likes}</button></h2>
-                <div class="chart-container">
-                    <div class="bar bar-a" style="width: ${sideAPercent}%;"></div>
-                    <div class="bar bar-b" style="width: ${sideBPercent}%;"></div>
-                </div>
-                <button onclick="handleVote('${topic.id}', 'sideA')">${topic.optionA} (${topic.votes.sideA})</button>
-                <button onclick="handleVote('${topic.id}', 'sideB')">${topic.optionB} (${topic.votes.sideB})</button>
-                <div class="comments">
-                    <div>
-                        <h4>挺 ${topic.optionA}</h4>
-                        <ul id="comments-list-sideA-${topic.id}">${renderComments(topic.comments.sideA, topic.id, 'sideA')}</ul>
-                        <input type="text" id="comment-input-sideA-${topic.id}" placeholder="輸入留言...">
-                        <button onclick="handleComment('${topic.id}', 'sideA')">發表留言</button>
-                    </div>
-                    <div>
-                        <h4>挺 ${topic.optionB}</h4>
-                        <ul id="comments-list-sideB-${topic.id}">${renderComments(topic.comments.sideB, topic.id, 'sideB')}</ul>
-                        <input type="text" id="comment-input-sideB-${topic.id}" placeholder="輸入留言...">
-                        <button onclick="handleComment('${topic.id}', 'sideB')">發表留言</button>
-                    </div>
-                </div>
-            `;
-            container.appendChild(topicDiv);
-        }
+    if (totalVotes === 0) {
+        chartHTML = `<div class="bar bar-empty"></div>`;
+    } else {
+        const sideAPercent = Math.round((topic.votes.sideA / totalVotes) * 100);
+        const sideBPercent = 100 - sideAPercent;
+        chartHTML = `
+            <div class="bar bar-a" style="width: ${sideAPercent}%;"></div>
+            <div class="bar bar-b" style="width: ${sideBPercent}%;"></div>
+        `;
+    }
+
+    const topicDiv = document.createElement("div");
+    topicDiv.classList.add("topic");
+    topicDiv.innerHTML = `
+        <h2>${topic.title} <button onclick="likeTopic('${topic.id}')">👍 ${topic.likes}</button></h2>
+        <div class="chart-container">${chartHTML}</div>
+        <button onclick="handleVote('${topic.id}', 'sideA')">${topic.optionA} (${topic.votes.sideA})</button>
+        <button onclick="handleVote('${topic.id}', 'sideB')">${topic.optionB} (${topic.votes.sideB})</button>
+        <div class="comments">
+            <div>
+                <h4>挺 ${topic.optionA}</h4>
+                <ul id="comments-list-sideA-${topic.id}">${renderComments(topic.comments.sideA, topic.id, 'sideA')}</ul>
+                <input type="text" id="comment-input-sideA-${topic.id}" placeholder="輸入留言...">
+                <button onclick="handleComment('${topic.id}', 'sideA')">發表留言</button>
+            </div>
+            <div>
+                <h4>挺 ${topic.optionB}</h4>
+                <ul id="comments-list-sideB-${topic.id}">${renderComments(topic.comments.sideB, topic.id, 'sideB')}</ul>
+                <input type="text" id="comment-input-sideB-${topic.id}" placeholder="輸入留言...">
+                <button onclick="handleComment('${topic.id}', 'sideB')">發表留言</button>
+            </div>
+        </div>
+    `;
+    container.appendChild(topicDiv);
+}
+
 
         function renderComments(comments, topicId, side) {
             return comments.sort((a, b) => b.likes - a.likes)
