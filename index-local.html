@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>審判 - 辯論投票 (本地測試版)</title>
+
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .container { max-width: 600px; margin: auto; }
+        .topic { border: 1px solid #ccc; padding: 10px; margin-bottom: 10px; padding: 10px; }
+        .chart { width: 100%; height: 10px; background: gray; margin: 5px 0; display: flex; }
+        .bar { height: 10px; }
+        .comments { display: flex; justify-content: space-between; margin-top: 10px; }
+        .comments div { width: 48%; padding: 5px; border: 1px solid #ccc; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>審判 - 辯論投票 (本地測試版)</h1>
+
+        <!-- 新增話題 -->
+        <div id="new-topic-section">
+            <input type="text" id="new-topic" placeholder="輸入話題（格式: A 還是 B）">
+            <button id="add-topic-btn">發表話題</button>
+        </div>
+
+        <!-- 顯示話題 -->
+        <h2>🔥 熱門話題 (最多 5 個)</h2>
+        <div id="hot-topics"></div>
+
+        <h2>🆕 最新話題</h2>
+        <div id="latest-topics"></div>
+    </div>
+
+    <script>
+        let topics = []; // 存儲話題
+
+        const newTopicInput = document.getElementById("new-topic");
+        const addTopicBtn = document.getElementById("add-topic-btn");
+        const hotTopicsDiv = document.getElementById("hot-topics");
+        const latestTopicsDiv = document.getElementById("latest-topics");
+
+        // 新增話題
+        addTopicBtn.addEventListener("click", () => {
+            const title = newTopicInput.value.trim();
+            const match = title.match(/(.+?)\s*還是\s*(.+)/);
+
+            if (!match) {
+                alert("請輸入格式: A 還是 B");
+                return;
+            }
+
+            const [_, optionA, optionB] = match;
+
+            const newTopic = {
+                id: Date.now().toString(),
+                title,
+                optionA,
+                optionB,
+                votes: { sideA: 0, sideB: 0 },
+                comments: { sideA: [], sideB: [] },
+                likes: 0,
+                createdAt: Date.now()
+            };
+
+            topics.push(newTopic);
+            newTopicInput.value = "";
+            alert("話題發表成功！");
+            loadTopics();
+        });
+
+        function loadTopics() {
+            hotTopicsDiv.innerHTML = "";
+            latestTopicsDiv.innerHTML = "";
+
+            const sortedByLikes = [...topics].sort((a, b) => b.likes - a.likes).slice(0, 5);
+            const sortedByTime = [...topics].sort((a, b) => b.createdAt - a.createdAt);
+
+            sortedByLikes.forEach(topic => addTopicToUI(topic, hotTopicsDiv));
+            sortedByTime.slice(0, 5).forEach(topic => addTopicToUI(topic, latestTopicsDiv));
+        }
+
+        function addTopicToUI(topic, container) {
+            const topicDiv = document.createElement("div");
+            topicDiv.classList.add("topic");
+            topicDiv.innerHTML = `
+                <h2>${topic.title} <button onclick="likeTopic('${topic.id}')">👍 ${topic.likes}</button></h2>
+                <button onclick="handleVote('${topic.id}', 'sideA')">${topic.optionA} (${topic.votes.sideA})</button>
+                <button onclick="handleVote('${topic.id}', 'sideB')">${topic.optionB} (${topic.votes.sideB})</button>
+
+                <div class="comments">
+                    <div>
+                        <h4>挺 ${topic.optionA}</h4>
+                        <ul id="comments-list-sideA-${topic.id}">${renderComments(topic.comments.sideA, topic.id, 'sideA')}</ul>
+                        <input type="text" id="comment-input-sideA-${topic.id}" placeholder="輸入留言...">
+                        <button onclick="handleComment('${topic.id}', 'sideA')">發表留言</button>
+                    </div>
+                    <div>
+                        <h4>挺 ${topic.optionB}</h4>
+                        <ul id="comments-list-sideB-${topic.id}">${renderComments(topic.comments.sideB, topic.id, 'sideB')}</ul>
+                        <input type="text" id="comment-input-sideB-${topic.id}" placeholder="輸入留言...">
+                        <button onclick="handleComment('${topic.id}', 'sideB')">發表留言</button>
+                    </div>
+                </div>
+            `;
+            container.appendChild(topicDiv);
+        }
+
+        function renderComments(comments, topicId, side) {
+            return comments
+                .sort((a, b) => b.likes - a.likes)
+                .map((comment, index) => `
+                    <li>${comment.text} 👍 ${comment.likes} 
+                        <button onclick="likeComment('${topicId}', '${side}', ${index})">👍</button>
+                    </li>`).join('');
+        }
+
+        function handleVote(id, side) {
+            const topic = topics.find(t => t.id === id);
+            if (!topic) return;
+
+            topic.votes[side] += 1;
+            loadTopics(); 
+        }
+
+        function handleComment(id, side) {
+            console.log(`嘗試留言，話題 ID: ${id}, 陣營: ${side}`);
+
+            const commentInput = document.getElementById(`comment-input-${side}-${id}`);
+
+            if (!commentInput) {
+                console.error(`找不到留言輸入框: comment-input-${side}-${id}`);
+                return;
+            }
+
+            const comment = commentInput.value.trim();
+            if (comment === "") {
+                alert("留言內容不能為空！");
+                return;
+            }
+
+            const topic = topics.find(t => t.id === id);
+            if (!topic) {
+                console.error(`找不到話題 ID: ${id}`);
+                return;
+            }
+
+            topic.comments[side].push({ text: comment, likes: 0 });
+            commentInput.value = "";
+            loadTopics();
+        }
+
+        function likeComment(id, side, index) {
+            const topic = topics.find(t => t.id === id);
+            if (!topic) return;
+
+            topic.comments[side][index].likes += 1;
+            loadTopics();
+        }
+
+        function likeTopic(id) {
+            const topic = topics.find(t => t.id === id);
+            if (!topic) return;
+
+            topic.likes += 1;
+            loadTopics();
+        }
+
+        loadTopics();
+    </script>
+</body>
+</html>
